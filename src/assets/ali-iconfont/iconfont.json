@@ -1,0 +1,79 @@
+{
+  "id": "2038913",
+  "name": "hsfx-vant",
+  "font_family": "iconfont",
+  "css_prefix_text": "icon-",
+  "description": "",
+  "glyphs": [
+    {
+      "icon_id": "6539847",
+      "name": "返回",
+      "font_class": "fanhui",
+      "unicode": "e605",
+      "unicode_decimal": 58885
+    },
+    {
+      "icon_id": "7511501",
+      "name": "定位",
+      "font_class": "dingwei",
+      "unicode": "e61f",
+      "unicode_decimal": 58911
+    },
+    {
+      "icon_id": "14469857",
+      "name": "联系方式",
+      "font_class": "lianxifangshi",
+      "unicode": "e637",
+      "unicode_decimal": 58935
+    },
+    {
+      "icon_id": "2396335",
+      "name": "房子",
+      "font_class": "weibiaoti-_fuzhi",
+      "unicode": "e647",
+      "unicode_decimal": 58951
+    },
+    {
+      "icon_id": "298554",
+      "name": "房屋求租招租",
+      "font_class": "fangwuqiuzuzhaozu",
+      "unicode": "e6ee",
+      "unicode_decimal": 59118
+    },
+    {
+      "icon_id": "9435014",
+      "name": "托管",
+      "font_class": "tuoguan",
+      "unicode": "e740",
+      "unicode_decimal": 59200
+    },
+    {
+      "icon_id": "10998091",
+      "name": "我 的",
+      "font_class": "wode",
+      "unicode": "e60d",
+      "unicode_decimal": 58893
+    },
+    {
+      "icon_id": "11120416",
+      "name": "加号",
+      "font_class": "hao",
+      "unicode": "e600",
+      "unicode_decimal": 58880
+    },
+    {
+      "icon_id": "11949139",
+      "name": "搜索--1",
+      "font_class": "icon-search",
+      "unicode": "e601",
+      "unicode_decimal": 58881
+    },
+    {
+      "icon_id": "15694720",
+      "name": "托管",
+      "font_class": "tuoguan1",
+      "unicode": "e63b",
+      "unicode_decimal": 58939
+    }
+  ]
+}

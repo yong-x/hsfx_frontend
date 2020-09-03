@@ -1,0 +1,32 @@
+body{
+	
+}
+/* 主体内容区，上下留白以显示头部导航和底部导航 */
+.my-content{
+	width: %100;
+	/* margin-top: 1.4375rem; */
+	padding-top: 1.4375rem;
+	padding-bottom: 1.875rem;
+}
+/* 头部导航区样式 */
+.van-nav-bar {
+	background-color: #708090;
+	position: fixed;
+	top: 0;
+	left: 0;
+	width: 100%;
+}
+/* 头部导航区中标题样式 */
+.van-nav-bar .van-nav-bar__title{
+		font-weight: 1000;
+}
+
+/*商品列表价格数字样式*/
+.van-card__bottom .van-card__price span{ 	
+	font-weight: bold;
+	color: red !important;
+}
+.van-tag {
+	margin-right: 0.1875rem;
+	margin-bottom: 0.125rem;
+}
