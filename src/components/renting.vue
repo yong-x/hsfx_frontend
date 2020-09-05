@@ -8,7 +8,7 @@
 			</template>
 		</van-nav-bar>
 		<!-- 弹出层搜索表单 -->
-		<van-popup v-model="showPopupForm" get-container="#topNav" position="top" :style="{ height: 'fit-content'}">
+		<van-popup v-model="showPopupForm"  position="top" :style="{ height: 'fit-content'}">
 			<van-form>
 				<!-- 关键词选项 -->
 				<van-field v-model="searchForm.tagkey" type="text" name="房屋关键字" label="关键字" placeholder="请输入房屋关键字" :rules="[]" />
@@ -56,7 +56,7 @@
 				</div>
 			</van-form>
 		</van-popup>
-		<!-- 主体内容区 style="margin-top: 1.4375rem;"-->
+		<!-- 主体内容区 -->
 		<van-pull-refresh v-model="refreshing" @refresh="onRefresh" success-text="刷新成功">
 			<van-list 
 			v-model="loading"		

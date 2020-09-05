@@ -49,7 +49,9 @@ import {
 		Swipe, 
 		SwipeItem,
 		Lazyload,
-		Area  } from 'vant';
+		Area,
+		Checkbox,
+		CheckboxGroup  } from 'vant';
 //全局注册vant组件
 Vue.use(Tabbar);
 Vue.use(TabbarItem);
@@ -74,6 +76,8 @@ Vue.use(Swipe);
 Vue.use(SwipeItem);
 Vue.use(Lazyload);
 Vue.use(Area  );
+Vue.use(Checkbox);
+Vue.use(CheckboxGroup);
 
 //axios插件进行http请求
 import axios from 'axios'

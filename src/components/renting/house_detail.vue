@@ -1,6 +1,6 @@
 <template>
 	<div class="my-content">
-		<!-- 顶部导航条 -->
+		
 		<!-- 顶部导航条 -->
 		<detail-add-navbar navBarTitle="房源详情"></detail-add-navbar>
 		<!-- 房屋图片 -->

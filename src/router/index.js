@@ -10,6 +10,10 @@ import addhouse from '../components/renting/addhouse.vue'
 import house_detail from '../components/renting/house_detail.vue'
 import login from '../components/login.vue'
 import register from '../components/register.vue'
+import adddemanding from '../components/demanding/adddemanding.vue'
+import demanding_detail from '../components/demanding/demanding_detail.vue'
+import addtrusting from '../components/trusting/addtrusting.vue'
+import trusting_detail from '../components/trusting/trusting_detail.vue'
 
 /*
 this.$router是Vue-Router的实例，需要导航到不同路由则用this.$router.push方法
@@ -65,7 +69,7 @@ Vue.use(VueRouter)
        name: 'mine',
        component: mine
      },
-	 {
+	 { //出租房屋相关
 	   path: '/addhouse',
 	   name: 'addhouse',
 	   component: addhouse
@@ -74,6 +78,26 @@ Vue.use(VueRouter)
 	   path: '/house_detail',
 	   name: 'house_detail',
 	   component: house_detail
+	 },	 
+	 { //房屋求租相关
+	   path: '/adddemanding',
+	   name: 'adddemanding',
+	   component: adddemanding
+	 },
+	 {
+	   path: '/demanding_detail',
+	   name: 'demanding_detail',
+	   component: demanding_detail
+	 },
+	 { //提供托管相关
+	   path: '/addtrusting',
+	   name: 'addtrusting',
+	   component: addtrusting
+	 },
+	 {
+	   path: '/trusting_detail',
+	   name: 'trusting_detail',
+	   component: trusting_detail
 	 }
     ]
   } 

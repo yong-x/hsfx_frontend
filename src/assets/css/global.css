@@ -30,3 +30,8 @@ body{
 	margin-right: 0.1875rem;
 	margin-bottom: 0.125rem;
 }
+p{
+      font-family: "宋体","仿宋",sans-serif;/*若电脑不支持宋体，则用仿宋，若不支持仿宋，则在sans-serif中找*/              
+      opacity: 0.5;/*字体的透明度：1：默认样式，0：全透明*/
+	  line-height: 0.625rem
+  }
