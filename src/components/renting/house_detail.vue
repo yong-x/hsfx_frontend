@@ -5,8 +5,8 @@
 		<detail-add-navbar navBarTitle="房源详情"></detail-add-navbar>
 		<!-- 房屋图片 -->
 		<van-swipe :autoplay="3000" indicator-color="white" width="100%" height="300">
-		  <van-swipe-item  v-for="(image, index) in house.imglist" :key="index">
-		    <img style="width: 100%; height: 100%;" v-lazy="image" />
+		  <van-swipe-item  v-for="(imageSrc, index) in house.imglist" :key="index">
+		    <img style="width: 100%; height: 100%;" v-lazy="getRealImgSrc(imageSrc)" />
 		  </van-swipe-item>
 		</van-swipe>
 		<!-- 发布人信息 -->
@@ -26,7 +26,7 @@
 		  </van-col>
 		  <van-col span="8">
 			  <div class="desc-title">位置</div>
-			  <div class="desc-content">{{house.house_adderss}}</div>
+			  <div class="desc-content">{{house.house_address.split(' ')[1]}}</div>
 		  </van-col>
 		</van-row>
 		<!-- 房屋标签 -->
@@ -37,10 +37,10 @@
 		<!-- 详情描述 -->
 		<div class="house-detail">
 			<h3 class="detail-title">详情描述</h3>
-			<div class="detail-content">{{house.house_detail}}</div>			
+			<p class="detail-content">{{house.house_detail}}</p>			
 			<div class="detail-address">
-				<a :href="'http://api.map.baidu.com/geocoder?address='+house.house_adderss+'&output=html&src=webapp.baidu.openAPIdemo'">
-					<van-icon  class="iconfont" class-prefix="icon" name="dingwei" />  {{house.house_adderss}}
+				<a :href="'http://api.map.baidu.com/geocoder?address='+house.house_address+'&output=html&src=webapp.baidu.openAPIdemo'">
+					<van-icon  class="iconfont" class-prefix="icon" name="dingwei" />  {{house.house_address}}
 				</a>				
 			</div>
 		</div>
@@ -61,7 +61,10 @@
 				house:{}
 			}
 		},
-		methods:{			
+		methods:{
+			getRealImgSrc(relativeImgSrc){
+				return process.env.VUE_APP_Server+relativeImgSrc
+			},
 			dial(){
 				window.location.href = 'tel:' +this.house.publisher_phone
 			}

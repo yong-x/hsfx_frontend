@@ -13,6 +13,26 @@
 			 :rules="[{ required: true, message: '请确认地区' }]" />
 			<van-field v-model="detail_address" name="详细地址" label="详细地址" placeholder="小区或街道 楼栋" :rules="[{ required: true, message: '请填写房源详细地址' }]" />
 			<van-field v-model="price_monthly" type="number" name="月租金(元)" label="月租金(元)" placeholder="月租金(元)" :rules="[{ required: true, message: '请填写每月租金' }]" />
+			<van-field v-model="area" type="number" name="房屋面积" label="房屋面积" placeholder="房屋面积(平方米)" :rules="[{ required: true, message: '请填写房屋面积' }]" />
+			<van-row class="mylayout_row">
+			  <van-col span="12">
+				  <van-field label="室数目" label-width="4em">
+					  <template #input>
+					     <van-stepper v-model.number="bedroom" min="1" max="10" />
+					  </template>
+				  </van-field>				 
+			  </van-col>
+			  <van-col span="12">
+				  <van-field label="厅数目" label-width="4em">
+				  		<template #input>
+				  		   <van-stepper v-model.number="hall" min="0" max="10" />
+				  		</template>
+				  </van-field>	
+			  </van-col>
+			  
+			</van-row>
+			
+			
 			<van-field name="uploader" label="房源图片">
 				<template #input>
 					<van-uploader v-model="imglist" :after-read="afterRead" accept="image/*" multiple :max-count="5" :max-size="5 * 1024*1024" />
@@ -36,9 +56,13 @@
 	export default {
 		data() {
 			return {
+				user: {},  //当前登录用户
 				taglist: '', //房源标签
 				house_detail: '', //详细描述		
 				price_monthly: '', //每月租金
+				area: '',
+				bedroom: 1,
+				hall: 0,
 				imglist: [],
 
 				province_city_region: '', //所选择的省市区
@@ -67,10 +91,22 @@
 						420117: '新洲区'
 					}
 				},
-				value1: '',
+				
 
 
 			}
+		},
+		created() {
+			//检查sessionStorage中用户信息，即是否登录
+			let userJson = window.sessionStorage.getItem('user')
+			console.log(userJson)
+			if (!userJson) {
+				_this.$toast('请先登录')
+				_this.$router.push('/login')
+				return
+			}
+			//取出登录用户信息，方便下面取用
+			this.user = JSON.parse(userJson)
 		},
 		methods: {
 			ConfirmCity(cityinfo) { //地区选择器确认选择时			
@@ -92,23 +128,16 @@
 						}
 						const fromdata = new FormData(); //封装fromData发送数据到服务器
 
-						//检查sessionStorage中用户信息，即是否登录
-						let userJson = window.sessionStorage.getItem('user')
-						console.log(userJson)
-						if (!userJson) {
-							_this.$toast('请先登录')
-							_this.$router.push('/login')
-							return
-						}
-						//取出登录用户信息，方便下面取用
-						let user = JSON.parse(userJson)
+						
 
 						/*将普通字符串和图片文件数据封装为formdata，进行上传*/
-						fromdata.append('publisher_phone', user.phone);
-						fromdata.append('publisher_uid', user.uid);
-						fromdata.append('taglist', _this.taglist);
+						fromdata.append('publisher_phone', _this.user.phone);
+						fromdata.append('publisher_uid', _this.user.uid);
+						fromdata.append('taglist', _this.taglist.replace(/\s+/g,' '));//多个空格全部替换为一个空格
 						fromdata.append('house_detail', _this.house_detail);
 						fromdata.append('house_address', _this.house_address);
+						fromdata.append('area', _this.area);
+						fromdata.append('layout', _this.layout);
 						fromdata.append('price_monthly', _this.price_monthly);
 						_this.imglist.forEach((item, index) => {
 							fromdata.append('file' + index, item.file);
@@ -133,17 +162,25 @@
 						})
 					})
 					.catch((e) => { //表单项绑定的验证规则没有全部通过后执行 catch 代码块
-						this.$toast(e[0].message)
+						_this.$toast(e[0].message)
 					})
 			}
 		},
 		computed: {
-			house_address() {
-				return this.province_city_region + ' ' + this.detail_address
+			house_address() { //省市区 与 详细地址之间以 空格 间隔
+				return this.province_city_region.replace(/\s+/g,"") + ' ' + this.detail_address.replace(/\s+/g,"")
+			},
+			layout(){
+				return this.bedroom+'室'+(this.hall>0?(this.hall+'厅'):'')
 			}
 		}
 	}
 </script>
 
-<style>
+<style lang="less" scoped>
+	.mylayout_row{
+		.van-cell.van-field{
+			padding-right: 0;			
+		}
+	}	
 </style>

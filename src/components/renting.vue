@@ -10,8 +10,10 @@
 		<!-- 弹出层搜索表单 -->
 		<van-popup v-model="showPopupForm"  position="top" :style="{ height: 'fit-content'}">
 			<van-form>
-				<!-- 关键词选项 -->
-				<van-field v-model="searchForm.tagkey" type="text" name="房屋关键字" label="关键字" placeholder="请输入房屋关键字" :rules="[]" />
+				<!-- 地址选项 -->
+				<van-field v-model="searchForm.address" type="text" name="房屋地址" label="房源地址" placeholder="请输入房源地址" :rules="[]" />				
+				<!-- 标签选项 -->
+				<van-field v-model="searchForm.tag" type="text" name="房屋标签" label="标签键字" placeholder="房屋标签关键字" :rules="[]" /><!-- 关键词选项 -->
 				<!-- 租金选项 -->
 				<van-row >
 					<van-col span="12">
@@ -59,11 +61,12 @@
 		<!-- 主体内容区 -->
 		<van-pull-refresh v-model="refreshing" @refresh="onRefresh" success-text="刷新成功">
 			<van-list 
-			v-model="loading"		
+			v-model="loading"
+			:immediate-check="false"
 			:finished="finished"
 			finished-text="没有更多了"
 			@load="onLoad">
-				<van-card v-for="item in list" :price="item.price_monthly"  :title="item.house_adderss" :thumb="item.imglist[0]" :key="item.houseid" @click="toHouseDetail(item)">
+				<van-card v-for="item in list" :price="item.price_monthly"  :title="item.house_adderss" :thumb="getRealImgSrc(item.imglist[0])" :key="item.houseid" @click="toHouseDetail(item)">
 					<template #tags>
 						<div class="house-layout-area">
 							<van-tag  type="success">{{item.layout}}</van-tag>
@@ -76,6 +79,8 @@
 						<van-tag plain type="primary" v-for="tag in item.taglist">{{tag}}</van-tag>					
 					</template>
 					<template #num>
+					
+						<span>{{item.house_address.split(' ')[1]}}</span><br/>
 						<span>{{item.publish_time}}</span>
 					</template>
 				</van-card>
@@ -93,23 +98,28 @@
 				showPicker: false, //显示时间选择器
 				min_date: new Date(2018, 0, 1), //时间选择器的最小可选时间
 				max_date: new Date(), //时间选择器的最大可选时间
-				currentSelectDateItem:'',
+				currentSelectDateItem:'',				
 				searchForm: { //弹出的搜索表单项
-					tagkey: '',
+					tag: '',
+					address:'',
 					min_price: '',
 					max_price: '',
 					min_size: '',
 					max_size: '',
 					start_time: '',
-					end_time: ''
-				},
+					end_time: '',
+					pageSize: 10,   //页面大小，每次请求多少条
+					pageNumber: 1  //当前请求的页号
+				},				
 				list:  [],  //当前展示的数据列表
+				isLastPage: false, //当前页是否是最后一页
 				loading: false,  //列表上拉加载状态，为true表示正在发送请求加载数据，为false表示加载数据结束
 				finished: false,  //是否所有数据加载完成
 				refreshing: false  //是否处于刷新过程中
 			};
 		},
 		created() {
+			/*
 			this.list = [{
 					houseid: 1,
 					publisher_uid: 1,
@@ -117,47 +127,18 @@
 					publisher_phone:'15812345678',
 					publish_time: '2018-10-10',
 					price_monthly: 1234.12,
-					house_adderss: '中南路，武昌火车站',
+					house_address: '中南路，武昌火车站',
 					house_detail: '优质房源，交通便利，基础设施配备齐全，周围超市学校菜场众多，欢迎有需要的朋友与我联系。',
 					imglist: [require('../assets/01.jpg'),require('../assets/02.jpg'),require('../assets/03.jpg'),require('../assets/04.jpg')],
 					taglist: ['朝阳','交通便利','独立厨房','学区房'],
 					area: 80,
-					layout: '2室1厅'
-					
-				},
-				{
-					houseid: 2,
-					publisher_uid: 2,
-					publisher_username: '李四',
-					publisher_phone:'13811111111',
-					publish_time: '2019-02-10',
-					price_monthly: 5678.99,
-					house_adderss: '武汉市洪山区',
-					house_detail: '优质房源，交通便利，基础设施配备齐全，周围超市学校菜场众多，欢迎有需要的朋友与我联系。',
-					imglist: [require('../assets/01.jpg'),require('../assets/02.jpg'),require('../assets/03.jpg'),require('../assets/04.jpg')],
-					taglist: ['朝阳','交通便利','独立厨房','学区房','朝阳','交通便利','独立厨房','学区房'],
-					area: 100,
-					layout: '3室1厅'
-					
-				},
-				{
-					houseid: 3,
-					publisher_uid: 3,
-					publisher_username: '王五',
-					publisher_phone:'13622222222',
-					publish_time: '2020-08-18',
-					price_monthly: 6789.88,
-					house_adderss: '武汉市洪山区',
-					house_detail: '优质房源，交通便利，基础设施配备齐全，周围超市学校菜场众多，欢迎有需要的朋友与我联系。',
-					imglist: [require('../assets/01.jpg'),require('../assets/02.jpg'),require('../assets/03.jpg'),require('../assets/04.jpg')],
-					taglist: ['朝阳','交通便利','独立厨房','学区房'],
-					area: 120,
-					layout: '4室1厅'
-					
-				}
-				
+					layout: '2室1厅'					
+				}				
 			]
-
+			*/		
+			
+			this.retrieveByForm(true)
+			
 		},
 		methods: {			
 			padDate: function(value) {    //在月份、日期、小时等小于10时前面补0
@@ -187,23 +168,51 @@
 				}
 				this.showPicker = false;
 			},
-			retrieveByForm(){  //根据表单搜索条件向服务器发送请求，查询数据对list赋值
-				
+			retrieveByForm(isRefresh){  //根据表单搜索条件向服务器发送请求，查询数据对list赋值
+				let _this = this
+				this.$http.post('/house/retrieve', 
+								this.searchForm								
+				).then(res => {
+					console.log(res)
+					if(res.meta.code===200){  //成功收到服务器响应数据						
+						if(res.data.houseList.length===0){ //没有检索到数据
+							_this.isLastPage = true  //当前页是最后一页
+						}						
+						if(isRefresh){
+							_this.list = res.data.houseList
+						}else{
+							_this.list = _this.list.concat(res.data.houseList)
+						}						
+					}
+				})
 			},
-			onLoad(){  //下拉加载时，请求下一页数据添加到List尾部
-				if(this.list.length>20){
-					this.loading = false //本次加载结束，可以执行下次加载
-					this.finished = true //所有数据加载完毕
-					this.$toast('没有更多数据了')
-					return 
+			getRealImgSrc(relativeImgSrc){				
+				return process.env.VUE_APP_Server+relativeImgSrc
+			},
+			onLoad(){  //上拉加载时，请求下一页数据添加到List尾部				
+				this.searchForm.pageNumber++				
+				this.retrieveByForm(false)				
+				if(this.isLastPage){ //上面请求的页是最后一页
+					this.loading = false //本次加载结束，
+					this.finished = true	//按当前搜索表单所有数据加载完毕				
 				}else{
-					let length = this.list.length
-					let arr = this.list.map((item,index)=>{ item.houseid=length+index+1;return item})					
-					this.list = this.list.concat(arr)
 					this.loading = false //本次加载结束，可以执行下次加载
-				}				
+					this.finished = false //所有数据加载完毕										
+				}
+			},
+			resetOnLoad(){  //恢复下拉加载
+				this.loading = false //
+				this.finished = false //
+				this.isLastPage = false //
 			},
 			onRefresh(){ //下拉刷新时，按表单条件检索第一页数据赋值给list
+				this.searchForm.pageNumber = 1 //重新请求第一页				
+				this.retrieveByForm(true)
+				this.refreshing = false				
+				
+				this.resetOnLoad()				
+				this.$toast('刷新成功')
+				/*
 				this.list =[{
 					houseid: 1,
 					publisher_uid: 1,
@@ -216,98 +225,33 @@
 					imglist: [require('../assets/01.jpg'),require('../assets/02.jpg'),require('../assets/03.jpg'),require('../assets/04.jpg')],
 					taglist: ['朝阳','交通便利','独立厨房','学区房'],
 					area: 80,
-					layout: '2室1厅'
-					
-				},
-				{
-					houseid: 2,
-					publisher_uid: 2,
-					publisher_username: '李四',
-					publisher_phone:'13811111111',
-					publish_time: '2019-02-10',
-					price_monthly: 5678.99,
-					house_adderss: '武汉市洪山区',
-					house_detail: '优质房源，交通便利，基础设施配备齐全，周围超市学校菜场众多，欢迎有需要的朋友与我联系。',
-					imglist: [require('../assets/01.jpg'),require('../assets/02.jpg'),require('../assets/03.jpg'),require('../assets/04.jpg')],
-					taglist: ['朝阳','交通便利','独立厨房','学区房'],
-					area: 100,
-					layout: '3室1厅'
-					
-				},
-				{
-					houseid: 3,
-					publisher_uid: 3,
-					publisher_username: '王五',
-					publisher_phone:'13622222222',
-					publish_time: '2020-08-18',
-					price_monthly: 6789.88,
-					house_adderss: '武汉市洪山区',
-					house_detail: '优质房源，交通便利，基础设施配备齐全，周围超市学校菜场众多，欢迎有需要的朋友与我联系。',
-					imglist: [require('../assets/01.jpg'),require('../assets/02.jpg'),require('../assets/03.jpg'),require('../assets/04.jpg')],
-					taglist: ['朝阳','交通便利','独立厨房','学区房'],
-					area: 120,
-					layout: '4室1厅'
-					
-				},
-				{
-					houseid: 4,
-					publisher_uid: 1,
-					publisher_username: '张三',
-					publisher_phone:'15812345678',
-					publish_time: '2018-10-10',
-					price_monthly: 1234.12,
-					house_adderss: '武汉市洪山区',
-					house_detail: '优质房源，交通便利，基础设施配备齐全，周围超市学校菜场众多，欢迎有需要的朋友与我联系。',
-					imglist: [require('../assets/01.jpg'),require('../assets/02.jpg'),require('../assets/03.jpg'),require('../assets/04.jpg')],
-					taglist: ['朝阳','交通便利','独立厨房','学区房'],
-					area: 80,
-					layout: '2室1厅'
-					
-				},
-				{
-					houseid: 5,
-					publisher_uid: 2,
-					publisher_username: '李四',
-					publisher_phone:'13811111111',
-					publish_time: '2019-02-10',
-					price_monthly: 5678.99,
-					house_adderss: '武汉市洪山区',
-					house_detail: '优质房源，交通便利，基础设施配备齐全，周围超市学校菜场众多，欢迎有需要的朋友与我联系。',
-					imglist: [require('../assets/01.jpg'),require('../assets/02.jpg'),require('../assets/03.jpg'),require('../assets/04.jpg')],
-					taglist: ['朝阳','交通便利','独立厨房','学区房'],
-					area: 100,
-					layout: '3室1厅'
-					
-				},
-				{
-					houseid: 6,
-					publisher_uid: 3,
-					publisher_username: '王五',
-					publisher_phone:'13622222222',
-					publish_time: '2020-08-18',
-					price_monthly: 6789.88,
-					house_adderss: '武汉市洪山区',
-					house_detail: '优质房源，交通便利，基础设施配备齐全，周围超市学校菜场众多，欢迎有需要的朋友与我联系。',
-					imglist: [require('../assets/01.jpg'),require('../assets/02.jpg'),require('../assets/03.jpg'),require('../assets/04.jpg')],
-					taglist: ['朝阳','交通便利','独立厨房','学区房'],
-					area: 120,
-					layout: '4室1厅'
-					
-				}
-				
-			]
-				this.refreshing = false
-				this.loading = false //
-				this.finished = false //使之可以在刷新成功之后在上拉加载下一页
-				this.$toast('刷新成功')
+					layout: '2室1厅'					
+				}				
+			]				
+				*/
 			},
 			submitForm(){ //提交表单，进行搜索
-				 this.$dialog.alert({
-				      message: JSON.stringify(this.searchForm)
-				    });
+				this.searchForm.pageNumber = 1 //搜索时请求第一页				
+				this.retrieveByForm(true)
+				
+				this.resetOnLoad()
+				
+				this.showPopupForm=false  //隐藏搜索表单
+				 // this.$dialog.alert({
+				 //      message: JSON.stringify(this.searchForm)
+				 //    });
 			},
 			resetForm(){ //重置表单
+				let pageNumber = this.searchForm.pageNumber
+				let pageSize = this.searchForm.pageSize
 				this.searchForm={}
+				this.searchForm.pageNumber=pageNumber
+				this.searchForm.pageSize=pageSize
+				
+				this.searchForm.pageNumber = 1 //重新请求第一页
+				this.retrieveByForm(true)				
+				
+				this.resetOnLoad()
 			},
 			toAddHouse(){
 				console.log(process.env.VUE_APP_Server)
@@ -315,7 +259,7 @@
 				this.$router.push('/addhouse')
 			},
 			toHouseDetail(house){
-				this.$toast('房源详情页')
+				this.$toast('房源详情页')				
 				this.$router.push({name:'house_detail',params:{house:house}})
 			}
 		}
@@ -326,7 +270,16 @@
 	.house-layout-area{
 		margin-top: 0.1875rem;
 		margin-bottom: 0.1875rem;
-	}
-
-	
+	}	
+	// 把价格数字放到最底部
+	.van-card__bottom {
+		position: relative;
+		.van-card__price{
+			position: absolute;
+			bottom: 0;
+		}
+		.van-card__num{
+			text-align: right;
+		}
+	}	
 </style>

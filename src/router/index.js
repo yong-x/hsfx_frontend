@@ -14,7 +14,8 @@ import adddemanding from '../components/demanding/adddemanding.vue'
 import demanding_detail from '../components/demanding/demanding_detail.vue'
 import addtrusting from '../components/trusting/addtrusting.vue'
 import trusting_detail from '../components/trusting/trusting_detail.vue'
-
+import addtrustdemand from '../components/trusting_demanding/addtrustdemand.vue'
+import trustdemand_detail from '../components/trusting_demanding/trustdemand_detail.vue'
 /*
 this.$router是Vue-Router的实例，需要导航到不同路由则用this.$router.push方法
 this.$route为当前路由的跳转对象，包含当前路由的name、path、query、params等属性。
@@ -98,6 +99,16 @@ Vue.use(VueRouter)
 	   path: '/trusting_detail',
 	   name: 'trusting_detail',
 	   component: trusting_detail
+	 },
+	 { //托管需求相关
+	   path: '/addtrustdemand',
+	   name: 'addtrustdemand',
+	   component: addtrustdemand
+	 },
+	 {
+	   path: '/trustdemand_detail',
+	   name: 'trustdemand_detail',
+	   component: trustdemand_detail
 	 }
     ]
   } 

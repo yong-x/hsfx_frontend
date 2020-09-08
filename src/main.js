@@ -51,7 +51,8 @@ import {
 		Lazyload,
 		Area,
 		Checkbox,
-		CheckboxGroup  } from 'vant';
+		CheckboxGroup,
+		Stepper} from 'vant';
 //全局注册vant组件
 Vue.use(Tabbar);
 Vue.use(TabbarItem);
@@ -78,6 +79,7 @@ Vue.use(Lazyload);
 Vue.use(Area  );
 Vue.use(Checkbox);
 Vue.use(CheckboxGroup);
+Vue.use(Stepper);
 
 //axios插件进行http请求
 import axios from 'axios'
@@ -88,10 +90,11 @@ axios.interceptors.response.use(  //响应拦截器，结构响应数据，对�
 				return response.data;
 			}, function (error) {
 				// 对响应错误,提示消息
+				
 				let tips = error.message==='Network Error'?'网络异常':(error.message.includes('timeout')?'连接服务器超时':'服务器异常')	
 				console.error('axios响应拦截器拦截捕获服务器异常===>')
 				console.log(JSON.stringify(error));	
-				Toast(tips)
+				Toast(tips+'=='+error)
 				return;
 				//如果不在响应拦截器对服务器错误进行处理，则直接返回下面语句，然后再catch(error)中就可以完整接收到error对象，并进行catch代码块的处理。
 				//return Promise.reject(error);	

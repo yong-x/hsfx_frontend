@@ -1,6 +1,9 @@
 <template>
 	<div class="my-content">
-		<van-nav-bar title="登录" >			
+		<van-nav-bar title="登录" >
+			<template #left>
+			    <van-icon @click="toHome"  class="iconfont" class-prefix="icon" name="weibiaoti-_fuzhi" />
+			</template>
 		</van-nav-bar>
 		
 		<div class="loginForm-title">
@@ -48,6 +51,9 @@
 			}
 		},
 		methods:{
+			toHome(){
+				this.$router.push('/home')
+			},
 			submitForm(){
 				let _this = this
 				this.$refs.loginForm.validate()

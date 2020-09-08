@@ -1,8 +1,8 @@
 <template>
 	<div class="my-content">
 		<!-- 顶部导航条 -->
-		<detail-add-navbar navBarTitle="发布托管提供信息"></detail-add-navbar>
-		添加提供托管页
+		<detail-add-navbar navBarTitle="发布托管需求"></detail-add-navbar>
+		添加托管需求
 	</div>
 </template>
 

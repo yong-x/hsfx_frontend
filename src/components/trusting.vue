@@ -79,10 +79,7 @@
 		data() {
 			return {				
 				showPopupForm: false, //显示搜索表单
-				showPicker: false, //显示时间选择器
-				min_date: new Date(2018, 0, 1), //时间选择器的最小可选时间
-				max_date: new Date(), //时间选择器的最大可选时间
-				currentSelectDateItem:'',
+				
 				searchForm: { //弹出的搜索表单项
 					title: '',
 					foodCondition:[],

@@ -6,7 +6,7 @@
 		<div class="main-container">
 			<div class="title">{{demanding.demand_title}}</div>
 			<div class="time grey-font">
-				<span>发布时间：</span>
+				<span>{{demanding.publisher_username}}发布于：</span>
 				<span>{{demanding.publish_time}}</span>			
 			</div>
 			<div class="price_layout">
@@ -21,13 +21,13 @@
 			</div>						
 			<div>
 				<span>区域：</span>
-				<span>{{demanding.house_adderss}}</span>			
+				<span class="grey-font">{{demanding.demand_address}}</span>			
 			</div>			
 			<hr/>
 			<div>
-				<span>联系方式：</span>
-				<span class="phone orange-font">{{demanding.publisher_phone}}</span>
-				<span style="margin-left: 0.3125rem;">{{demanding.demand_publisher}}</span>			
+				<span>求租信息发布人：</span>
+				<!-- <span class="phone orange-font">{{demanding.publisher_phone}}</span> -->
+				<span class="grey-font" >{{demanding.publisher_username}}</span>			
 			</div>			
 			
 			<div>
@@ -38,7 +38,10 @@
 			<div class="publisher-phone">
 				<span @click="dial" style="color: red;">
 					<van-icon  class="iconfont" class-prefix="icon" name="lianxifangshi" />{{demanding.publisher_phone}}
-				</span>	
+				</span>
+				<span style="color: #808080;font-size: 0.375rem;">
+					{{demanding.publisher_username}}
+				</span>
 			</div>
 		</div>
 	</div>
