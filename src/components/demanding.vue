@@ -11,7 +11,7 @@
 		<van-popup v-model="showPopupForm" position="top" :style="{ height: 'fit-content'}">
 			<van-form>
 				<!-- 求租标题选项 -->
-				<van-field v-model="searchForm.title" type="text" name="求租标题关键字" label="求租标题关键字" placeholder="求租标题关键字" :rules="[]" />
+				<van-field v-model="searchForm.title" type="text" name="求租标题" label="求租标题" placeholder="求租标题关键字" :rules="[]" />
 				<!-- 地址选项 -->
 				<van-field v-model="searchForm.address" type="text" name="房源地址" label="房源地址" placeholder="请输入房源地址关键词" :rules="[]" />
 				<!-- 租金选项 -->
@@ -46,9 +46,13 @@
 			</van-form>
 		</van-popup>
 		<!-- 主体内容区 -->
-		<van-pull-refresh v-model="refreshing" @refresh="onRefresh" success-text="刷新成功">
+		<van-pull-refresh 
+		v-model="refreshing" 
+		@refresh="onRefresh" 		
+		success-text="刷新成功">
 			<van-list  
-			v-model="loading"		
+			v-model="loading"
+			:immediate-check="false"
 			:finished="finished"
 			finished-text="没有更多了"
 			@load="onLoad">
@@ -65,7 +69,7 @@
 						</div>										
 					</template>
 					<template #num>
-						<span>{{item.house_address}}</span><br/>
+						<span>{{item.demand_address.split(' ')[1]}}</span><br/>
 						<span>{{item.publish_time}}</span>
 					</template>
 				</van-card>
@@ -141,13 +145,13 @@
 			
 			onLoad(){  //上拉加载时，请求下一页数据添加到List尾部
 				this.searchForm.pageNumber++				
-				this.retrieveByForm(false)				
-				if(this.isLastPage){ //上面请求的页是最后一页
-					this.loading = false //本次加载结束，
+				this.retrieveByForm(false)	
+				this.loading = false //本次加载下一页结束，
+				
+				if(this.isLastPage){ //上面请求的页是最后一页					
 					this.finished = true	//按当前搜索表单所有数据加载完毕				
-				}else{
-					this.loading = false //本次加载结束，可以执行下次加载
-					this.finished = false //所有数据加载完毕										
+				}else{					
+					this.finished = false //所有数据没有加载完										
 				}
 			},
 			resetOnLoad(){  //恢复下拉加载
@@ -171,21 +175,20 @@
 				this.resetOnLoad()
 				
 				this.showPopupForm=false  //隐藏搜索表单
-				this.$toast('检索完成')
-			},
-			
-			
-			
-			
-			resetForm(){ //重置搜索表单
-				this.searchForm={}
+				if(this.list.length===0){
+					this.$toast('没有检索到数据')
+				}else{
+					this.$toast('检索完成')
+				}
 				
+			},
+						
+			resetForm(){ //重置搜索表单		
 				let pageNumber = this.searchForm.pageNumber
 				let pageSize = this.searchForm.pageSize
 				this.searchForm={}
 				this.searchForm.pageNumber=pageNumber
 				this.searchForm.pageSize=pageSize
-				
 				this.searchForm.pageNumber = 1 //重新请求第一页
 				this.retrieveByForm(true)								
 				this.resetOnLoad()

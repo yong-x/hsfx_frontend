@@ -59,14 +59,17 @@
 			</van-form>
 		</van-popup>
 		<!-- 主体内容区 -->
-		<van-pull-refresh v-model="refreshing" @refresh="onRefresh" success-text="刷新成功">
+		<van-pull-refresh 
+		v-model="refreshing" 
+		@refresh="onRefresh" 
+		success-text="刷新成功">
 			<van-list 
 			v-model="loading"
 			:immediate-check="false"
 			:finished="finished"
 			finished-text="没有更多了"
 			@load="onLoad">
-				<van-card v-for="item in list" :price="item.price_monthly"  :title="item.house_adderss" :thumb="getRealImgSrc(item.imglist[0])" :key="item.houseid" @click="toHouseDetail(item)">
+				<van-card v-for="item in list" :desc="item.house_detail" :price="item.price_monthly"  :title="item.house_adderss" :thumb="getRealImgSrc(item.imglist[0])" :key="item.houseid" @click="toHouseDetail(item)">
 					<template #tags>
 						<div class="house-layout-area">
 							<van-tag  type="success">{{item.layout}}</van-tag>
@@ -191,16 +194,16 @@
 			},
 			onLoad(){  //上拉加载时，请求下一页数据添加到List尾部				
 				this.searchForm.pageNumber++				
-				this.retrieveByForm(false)				
-				if(this.isLastPage){ //上面请求的页是最后一页
-					this.loading = false //本次加载结束，
+				this.retrieveByForm(false)	
+				this.loading = false //本次加载结束，可以执行下次加载
+				
+				if(this.isLastPage){ //上面请求的页是最后一页					
 					this.finished = true	//按当前搜索表单所有数据加载完毕				
 				}else{
-					this.loading = false //本次加载结束，可以执行下次加载
 					this.finished = false //所有数据加载完毕										
 				}
 			},
-			resetOnLoad(){  //恢复下拉加载
+			resetOnLoad(){  //恢复上拉加载
 				this.loading = false //
 				this.finished = false //
 				this.isLastPage = false //
@@ -237,9 +240,11 @@
 				this.resetOnLoad()
 				
 				this.showPopupForm=false  //隐藏搜索表单
-				 // this.$dialog.alert({
-				 //      message: JSON.stringify(this.searchForm)
-				 //    });
+				if(this.list.length===0){
+					this.$toast('没有检索到数据')
+				}else{
+					this.$toast('检索完成')
+				}
 			},
 			resetForm(){ //重置表单
 				let pageNumber = this.searchForm.pageNumber
@@ -271,7 +276,7 @@
 		margin-top: 0.1875rem;
 		margin-bottom: 0.1875rem;
 	}	
-	// 把价格数字放到最底部
+	// 把价格数字放到最底部,时间，地址靠右
 	.van-card__bottom {
 		position: relative;
 		.van-card__price{

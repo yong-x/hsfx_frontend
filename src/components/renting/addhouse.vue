@@ -101,8 +101,8 @@
 			let userJson = window.sessionStorage.getItem('user')
 			console.log(userJson)
 			if (!userJson) {
-				_this.$toast('请先登录')
-				_this.$router.push('/login')
+				this.$toast('请先登录')
+				this.$router.push('/login')
 				return
 			}
 			//取出登录用户信息，方便下面取用
