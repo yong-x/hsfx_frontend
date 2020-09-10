@@ -71,7 +71,7 @@
 						window.sessionStorage.setItem('user',JSON.stringify(res.data.user))
 							_this.$router.push('/home')							
 						}						
-					  })	
+					})	
 				})
 				.catch((e=>{ //表单项规则没有全部验证通过时
 					console.log(e)

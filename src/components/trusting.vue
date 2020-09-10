@@ -61,7 +61,7 @@
 				<van-card v-for="item in list" :desc="item.trust_detail" :price="item.price_monthly"  :title="item.trust_title" :thumb="getRealImgSrc(item.imglist[0])" :key="item.trustid" @click="toTrustingDetail(item)">
 					<template #tags>
 						<div style="margin:0.3125rem;">
-							<van-tag v-if="item.edu_service.length>0" type="primary">课程辅导</van-tag>
+							<van-tag v-if="item.edu_service.length>0&&item.edu_service[0]!==''" type="primary">课程辅导</van-tag>
 							<van-tag plain type="primary" v-for="tag in item.food_service">{{tag}}</van-tag>
 						</div>
 					</template>

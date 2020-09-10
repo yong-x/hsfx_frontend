@@ -193,22 +193,23 @@
 			edu_service(){
 				let eduStr=''
 				this.eduCondition.forEach((item,index)=>{
-					eduStr+=item.trim('')+' '
+					eduStr+=item.trim(' ')+','
 				})
-				return eduStr.trim(' ')
+				return eduStr.trim(',')
 			},
 			food_service(){
 				let foodStr=''
 				this.foodCondition.forEach((item,index)=>{
-					foodStr+=item.trim('')+' '
+					foodStr+=item.trim(' ')+','
 				})
-				return foodStr.trim(' ')
+				return foodStr.trim(',')
 			}
 		}
 	}
 </script>
 
 <style lang="less" scoped>
+	// 标签下边距
 	.van-checkbox.van-checkbox--horizontal{
 		margin-bottom: 0.32rem;
 	}

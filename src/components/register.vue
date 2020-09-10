@@ -24,8 +24,7 @@
 		      name="姓名"
 		      label="姓名"
 		      placeholder="请输入姓名"
-		      :rules="[{ required: true, message: '请输入姓名' },
-		  			{ required:true, message: '请输入姓名' }]"
+		      :rules="[{ required: true, message: '请输入姓名' }]"
 		    />
 		  <van-field
 		    v-model="regForm.password"
