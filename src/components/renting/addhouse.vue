@@ -1,7 +1,7 @@
 <template>
 	<div class="my-content">
 		<!-- 顶部导航条 -->
-		<detail-add-navbar navBarTitle="添加房源"></detail-add-navbar>
+		<detail-add-navbar :navBarTitle="addOrUpdate=='add'?'发布房源':'修改房源信息'"></detail-add-navbar>
 		<!-- 要提交的表单 -->
 		<van-form :validate-first="true" :show-error-message="false" ref="addHouseForm">
 			<van-field v-model="taglist" name="房源标签" label="房源标签" placeholder="多个房源标签以空格分隔" :rules="[{ required: true, message: '请填写房源标签' },
@@ -32,8 +32,8 @@
 			  
 			</van-row>
 			
-			
-			<van-field name="uploader" label="房源图片">
+			<!-- 添加时允许选择图片，更新时不允许修改图片 -->
+			<van-field v-if="addOrUpdate=='add'?true:false" name="uploader" label="房源图片">
 				<template #input>
 					<van-uploader v-model="imglist" :after-read="afterRead" accept="image/*" multiple :max-count="5" :max-size="5 * 1024*1024" />
 				</template>
@@ -57,6 +57,8 @@
 		data() {
 			return {
 				user: {},  //当前登录用户
+				addOrUpdate: 'add', //当前是登录还是更新
+				houseid: '',
 				taglist: '', //房源标签
 				house_detail: '', //详细描述		
 				price_monthly: '', //每月租金
@@ -107,6 +109,33 @@
 			}
 			//取出登录用户信息，方便下面取用
 			this.user = JSON.parse(userJson)
+			
+			let house = this.$route.params.house
+			console.log(house)
+			if(house){ //当前页是更新房源信息页
+				this.addOrUpdate = 'update'
+				
+				house.taglist.forEach(tag=>{
+					this.taglist+=tag+' '
+				})
+				this.taglist.trim(' ')
+				
+				this.houseid = house.houseid	
+				this.house_detail = house.house_detail	
+				this.price_monthly = house.price_monthly
+				this.area = house.area
+				this.bedroom = house.layout.length>=2?house.layout.substr(0,1):1
+				this.hall = house.layout.length>=4?house.layout.substr(2,1):0
+				//this.imglist=
+				
+				this.province_city_region = house.house_address.split(' ')[0]
+				this.detail_address = house.house_address.split(' ')[1]
+				
+				
+			}else{ //当前页是添加房源信息页
+				this.addOrUpdate = 'add'	
+			}
+			
 		},
 		methods: {
 			ConfirmCity(cityinfo) { //地区选择器确认选择时			
@@ -118,7 +147,7 @@
 				// 此时可以自行将文件上传至服务器
 				console.log(file);
 			},
-			submitForm() { //验证表单项并上传			
+			addHouse(){ //添加房源时
 				let _this = this
 				this.$refs.addHouseForm.validate()
 					.then(() => { //表单项绑定的验证规则全部通过后执行 then 代码块					
@@ -127,13 +156,13 @@
 							return
 						}
 						const fromdata = new FormData(); //封装fromData发送数据到服务器
-
+				
 						
-
+				
 						/*将普通字符串和图片文件数据封装为formdata，进行上传*/
 						fromdata.append('publisher_phone', _this.user.phone);
 						fromdata.append('publisher_uid', _this.user.uid);
-						fromdata.append('taglist', _this.taglist.replace(/\s+/g,' '));//多个空格全部替换为一个空格
+						fromdata.append('taglist', _this.taglist.trim(' ').replace(/\s+/g,' '));//多个空格全部替换为一个空格
 						fromdata.append('house_detail', _this.house_detail);
 						fromdata.append('house_address', _this.house_address);
 						fromdata.append('area', _this.area);
@@ -142,7 +171,7 @@
 						_this.imglist.forEach((item, index) => {
 							fromdata.append('file' + index, item.file);
 						})
-
+				
 						//打印出formdata数据
 						for (var [a, b] of fromdata.entries()) {
 							console.log(a, b);
@@ -164,6 +193,45 @@
 					.catch((e) => { //表单项绑定的验证规则没有全部通过后执行 catch 代码块
 						_this.$toast(e[0].message)
 					})
+			},
+			updateHouse(){  //更新房源时
+				let _this = this
+				this.$refs.addHouseForm.validate()
+				.then(()=>{
+					_this.$http.post('/house/update', 
+					{
+						houseid:_this.houseid,
+						publisher_phone:_this.user.phone,
+						publisher_uid:_this.user.uid,
+						taglist:_this.taglist.trim(' ').replace(/\s+/g,' '),
+						house_detail:_this.house_detail,
+						house_address: _this.house_address,
+						area:_this.area,
+						layout:_this.layout,
+						price_monthly:_this.price_monthly
+					}).then(res => {
+							console.log(res)
+							if(res.meta.code!==200){  //收到服务器的失败信息
+								_this.$toast(res.meta.msg)
+							}else{  //更新成功，跳转我的房源列表页
+								_this.$toast('更新房源信息成功')
+								_this.$router.replace('/myhouselist')
+							}
+						})
+					
+				})
+				.catch((e) => { //表单项绑定的验证规则没有全部通过后执行 catch 代码块
+					_this.$toast(e[0].message)
+				})
+			},
+			
+			
+			submitForm() { //验证表单项并上传			
+				if(this.addOrUpdate==='add'){
+					this.addHouse()
+				}else{
+					this.updateHouse()
+				}				
 			}
 		},
 		computed: {

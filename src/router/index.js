@@ -18,6 +18,7 @@ import addtrustdemand from '../components/trusting_demanding/addtrustdemand.vue'
 import trustdemand_detail from '../components/trusting_demanding/trustdemand_detail.vue'
 import userinfo from '../components/user/userinfo.vue'
 import update_pwd from '../components/user/update_pwd.vue'
+import myhouselist from '../components/renting/myhouselist.vue'
 
 /*
 this.$router是Vue-Router的实例，需要导航到不同路由则用this.$router.push方法
@@ -73,8 +74,8 @@ Vue.use(VueRouter)
        name: 'mine',
        component: mine
      },
-	 { //出租房屋相关
-	   path: '/addhouse',
+	 { //房屋出租相关
+	   path: '/addhouse', //添加和更新时共用同一个组件
 	   name: 'addhouse',
 	   component: addhouse
 	 },
@@ -82,6 +83,11 @@ Vue.use(VueRouter)
 	   path: '/house_detail',
 	   name: 'house_detail',
 	   component: house_detail
+	 },
+	 {
+	   path: '/myhouselist',
+	   name: 'myhouselist',
+	   component: myhouselist
 	 },	 
 	 { //房屋求租相关
 	   path: '/adddemanding',

@@ -2,7 +2,7 @@
 	<div class="my-content">
 		<van-nav-bar id="topNav" title="我的"></van-nav-bar>
 		<ul class="mine-menu">
-			<li>发布的房源提供信息</li>
+			<li @click="toMyHouse">发布的房源提供信息</li>
 			<li>发布的房源求租信息</li>
 			<li>发布的托管提供信息</li>
 			<li>发布的托管需求信息</li>
@@ -48,7 +48,11 @@
 			},
 			logout(){  //退出登录
 				window.sessionStorage.clear();
+				window.localStorage.clear();
 				this.$router.replace('/login')
+			},
+			toMyHouse(){
+				this.$router.push('/myhouselist')
 			}
 		}
 	}
