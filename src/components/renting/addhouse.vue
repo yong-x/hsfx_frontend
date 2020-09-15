@@ -57,8 +57,9 @@
 		data() {
 			return {
 				user: {},  //当前登录用户
-				addOrUpdate: 'add', //当前是登录还是更新
-				houseid: '',
+				addOrUpdate: 'add', //当前是登录还是更新		
+				houseid: '',  //添加时没有此值，更新时有此值
+				
 				taglist: '', //房源标签
 				house_detail: '', //详细描述		
 				price_monthly: '', //每月租金
@@ -227,10 +228,10 @@
 			
 			
 			submitForm() { //验证表单项并上传			
-				if(this.addOrUpdate==='add'){
-					this.addHouse()
+				if(this.addOrUpdate==='update'){
+					this.updateHouse()					
 				}else{
-					this.updateHouse()
+					this.addHouse()
 				}				
 			}
 		},

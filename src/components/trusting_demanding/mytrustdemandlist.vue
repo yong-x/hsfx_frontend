@@ -1,7 +1,7 @@
 <template>
-	<div class="my-content">		
+	<div class="my-content">
 		<!-- 头部导航区 -->
-		<van-nav-bar id="topNav" title="我发布的房源" @click-left="$router.go(-1)">
+		<van-nav-bar id="topNav" title="我发布的托管需求信息" @click-left="$router.go(-1)">
 			<template #left>
 				<van-icon size="20" class="iconfont" class-prefix="icon" name="fanhui"/>
 			</template>
@@ -30,38 +30,39 @@
 			:finished="finished"
 			finished-text="没有更多了"
 			@load="onLoad">
-				<van-card v-for="(item ,index) in list" :desc="item.house_detail" :price="item.price_monthly"  :title="item.house_adderss" :thumb="getRealImgSrc(item.imglist[0])" :key="item.houseid" @click="toHouseDetail(item)">
+			
+				<van-card 
+				v-for="(item,index) in list" 
+				:price="item.price_monthly"  
+				:title="item.trustdemand_title" 
+				:desc="item.trustdemand_detail"  
+				:key="item.trustdemand_id" 
+				@click="toTrustDemandDetail(item)">
 					<template #tags>
-						<div class="house-layout-area">
-							<van-tag  type="success">{{item.layout}}</van-tag>
-							<van-tag  type="success">
-								<template #default>
-									{{item.area}}m&sup2;  
-								</template>
-							</van-tag>
+						<div style="margin:0.3125rem;">
+							<van-tag v-if="item.edu_service.length>0&&item.edu_service[0]!==''" type="primary">课程辅导</van-tag>
+							<van-tag plain type="primary" v-for="tag in item.food_service">{{tag}}</van-tag>
 						</div>
-						
-						<van-tag plain type="primary" v-for="tag in item.taglist">{{tag}}</van-tag>					
 					</template>
-					<template #num>					
-						<span>{{item.house_address.split(' ')[1]}}</span><br/>
+					<template #num>
+						<span>{{item.trustdemand_address.split(' ')[1]}}</span><br/>
 						<span>{{item.publish_time}}</span>
 					</template>
 					<template #footer>
-					    <van-button @click.stop="editHouse(item)" type="info" size="mini">编辑</van-button>
-					    <van-button @click.stop="deleteHouse(item.houseid,index)" type="danger" size="mini">删除</van-button>
+					    <van-button @click.stop="editTrustDemand(item)" type="info" size="mini">编辑</van-button>
+					    <van-button @click.stop="deleteTrustDemand(item.trustdemandid,index)" type="danger" size="mini">删除</van-button>
 									<!-- stop阻止事件冒泡，表示只响应当前回调方法 -->
 					</template>
-				</van-card>
-	
+				</van-card>			
 			</van-list>
+		
 	</div>
 </template>
 
 <script>
-	export default {
+	export default{
 		data() {
-			return {
+			return {				
 				user: {},//当前登录用户
 				showPicker: false, //显示时间选择器
 				min_date: new Date(2018, 0, 1), //时间选择器的最小可选时间
@@ -71,31 +72,17 @@
 				curdate: this.formatDate(),	//头部导航栏右边显示的时间条件			
 				pageSize: 10,   //页面大小，每次请求多少条
 				pageNumber: 1,  //当前请求的页号
-					
+				
+							
 				list:  [],  //当前展示的数据列表
 				isLastPage: false, //当前页是否是最后一页
 				loading: false,  //列表上拉加载状态，为true表示正在发送请求加载数据，为false表示加载数据结束
-				finished: false,  //是否所有数据加载完成				
+				finished: false  //是否所有数据加载完成
+				
 			};
 		},
 		created() {
-			/*
-			this.list = [{
-					houseid: 1,
-					publisher_uid: 1,
-					publisher_username: '张三',
-					publisher_phone:'15812345678',
-					publish_time: '2018-10-10',
-					price_monthly: 1234.12,
-					house_address: '中南路，武昌火车站',
-					house_detail: '优质房源，交通便利，基础设施配备齐全，周围超市学校菜场众多，欢迎有需要的朋友与我联系。',
-					imglist: [require('../assets/01.jpg'),require('../assets/02.jpg'),require('../assets/03.jpg'),require('../assets/04.jpg')],
-					taglist: ['朝阳','交通便利','独立厨房','学区房'],
-					area: 80,
-					layout: '2室1厅'					
-				}				
-			]
-			*/		
+			
 			//检查sessionStorage中用户信息，即是否登录
 			let userJson = window.sessionStorage.getItem('user')
 			console.log(userJson)
@@ -116,9 +103,9 @@
 				window.localStorage.removeItem('urlParams')
 			}				
 			//检索数据初始化列表
-			this.retrieveByForm(true)			
-		},		
-		methods: {			
+			this.retrieveByForm(true)
+		},
+		methods: {					
 			formatter(type, val) {  //弹出的时间选择器格式化器
 			     if (type === 'year') {
 			       return `${val}年`;
@@ -147,7 +134,8 @@
 				//return year + '-' + month + '-' + day + ' ' + hours + ':' + minutes + ':' + seconds;
 				//return year + '-' + month + '-' + day;
 				return year + '-' + month
-			},				
+			},			
+			
 			onConfirm(time) { //确认时间后,根据所点击元素，将所选时间值赋值给所点击元素，立即向服务器发送搜索请求								
 				this.curdate = this.formatDate(time)															
 				this.showPicker = false				
@@ -156,75 +144,71 @@
 				this.resetOnLoad()												
 			},
 			
+			
+			
 			retrieveByForm(isRefresh){  //根据表单搜索条件向服务器发送请求，查询数据对list赋值
 				let _this = this
 				this.$http.post(
-				'/house/retrieve', 
+				'/trust_demand/retrieve', 
 				{
 					publisher_uid:this.user.uid,
 					start_time: this.start_time,
 					end_time: 	this.end_time,
 					pageSize: 	this.pageSize,
 					pageNumber:	this.pageNumber
-				}								
+				}
 				).then(res => {
 					console.log(res)
 					if(res.meta.code===200){  //成功收到服务器响应数据						
-						if(res.data.houseList.length===0){ //没有检索到数据
+						if(res.data.trustdemandList.length===0){ //没有检索到数据
 							_this.isLastPage = true  //当前页是最后一页
 						}						
 						if(isRefresh){
-							_this.list = res.data.houseList							
+							_this.list = res.data.trustdemandList
 							if(_this.list.length===0){
 								_this.$toast('没有检索到数据')
 							}else{
 								_this.$toast('检索完成')
-							}							
+							}
 						}else{
-							_this.list = _this.list.concat(res.data.houseList)
-						}													
+							_this.list = _this.list.concat(res.data.trustdemandList)
+						}						
 					}
 				})
 			},
-			getRealImgSrc(relativeImgSrc){				
-				return process.env.VUE_APP_Server+relativeImgSrc
-			},
-			onLoad(){  //上拉加载时，请求下一页数据添加到List尾部				
+			onLoad(){  //上拉加载时，请求下一页数据添加到List尾部
 				this.pageNumber++				
 				this.retrieveByForm(false)	
-				this.loading = false //本次加载结束，可以执行下次加载
+				this.loading = false //本次加载下一页结束，
 				
 				if(this.isLastPage){ //上面请求的页是最后一页					
 					this.finished = true	//按当前搜索表单所有数据加载完毕				
-				}else{
-					this.finished = false //所有数据加载完毕										
+				}else{					
+					this.finished = false //所有数据没有加载完										
 				}
 			},
-			resetOnLoad(){  //恢复上拉加载
+			resetOnLoad(){  //恢复下拉加载
 				this.loading = false //
 				this.finished = false //
 				this.isLastPage = false //
-			},			
-			toAddHouse(){
-				console.log(process.env.VUE_APP_Server)
-				//this.$toast('添加房子')
-				this.$router.push('/addhouse')
 			},
-			toHouseDetail(house){
-				//this.$toast('房源详情页')				
-				this.$router.push({name:'house_detail',params:{house:house}})
+			// toAddTrustDemand(){  //去添加托管需求页
+			// 	this.$router.push('/addtrustdemand')
+			// },
+			toTrustDemandDetail(trustDemand){  //去托管需求详情页							
+				this.$router.push({name:'trustdemand_detail',params:{trustDemand:trustDemand}})
 			},
-			deleteHouse(houseid,index){  //删除发布的房源
+			deleteTrustDemand(trustdemandid,index){
 				let _this = this
 				this.$dialog.confirm({				  
 				  message: '确认要删除该条数据吗？',
 				})
 				.then(() => {
 				    // on confirm
-					
+								
 					_this.$http.post(
-						`/house/delete`,
-						{houseid: houseid,
+						`/trust_demand/delete`,
+						{trustdemandid: trustdemandid,
 						uid: _this.user.uid}					
 					)
 					.then(res => {
@@ -242,10 +226,9 @@
 					_this.$toast('你取消了删除操作')
 				});
 			},
-		
-			editHouse(house){  //编辑发布的房源(编辑与添加共用一个组件)
-				this.$router.push({name:'addhouse',params:{house:house}})
-			}
+			editTrustDemand(trustdemand){	//编辑发布的托管需求(编辑与添加共用一个组件)
+				this.$router.push({name:'addtrustdemand',params:{trustdemand:trustdemand}})
+			}			
 		},
 		beforeRouteLeave (to, from, next) { //离开本路由（页面）前将参数保持到localStorage中，进行参数保持
 			// 导航离开该组件的对应路由时调用
@@ -271,23 +254,19 @@
 				return year+'-'+month +'-'+ lastDate
 			}
 		}
-	};
+	}
 </script>
 
 <style lang="less" scoped>
-	.house-layout-area{
-		margin-top: 0.1875rem;
-		margin-bottom: 0.1875rem;
-	}	
-	// 把价格数字放到最底部,时间，地址靠右
-	.van-card__bottom {
-		position: relative;
-		.van-card__price{
-			position: absolute;
-			bottom: 0;
-		}
-		.van-card__num{
-			text-align: right;
-		}
-	}	
+// 把价格数字放到最底部
+.van-card__bottom {
+	position: relative;
+	.van-card__price{
+		position: absolute;
+		bottom: 0;
+	}
+	.van-card__num{
+		text-align: right;
+	}
+}
 </style>

@@ -1,7 +1,8 @@
 <template>
 	<div class="my-content">
 		<!-- 顶部导航条 -->
-		<detail-add-navbar navBarTitle="发布托管提供信息"></detail-add-navbar>
+		<detail-add-navbar
+		 :navBarTitle="addOrUpdate=='add'?'发布托管提供信息':'修改托管提供信息'"></detail-add-navbar>
 		<!-- 要提交的表单 -->
 		<van-form :validate-first="true" :show-error-message="false" ref="addTrustForm">
 			<!-- 标题 -->
@@ -49,8 +50,8 @@
 			  </template>
 			</van-field>
 			
-			
-			<van-field name="uploader" label="托管条件图片">
+			<!-- 添加时允许选择图片，更新时不允许修改图片 -->
+			<van-field v-if="addOrUpdate=='add'?true:false" name="uploader" label="托管条件图片">
 				<template #input>
 					<van-uploader v-model="imglist" :after-read="afterRead" accept="image/*" multiple :max-count="5" :max-size="5 * 1024*1024" />
 				</template>
@@ -74,6 +75,9 @@
 		data(){
 			return {
 				user: {},  //当前登录用户				
+				addOrUpdate: 'add', //当前是登录还是更新
+				trustid:'', //添加时没有此值，更新时有此值
+				
 				trust_title: '',
 				trust_detail: '',  //详情描述
 				price_monthly: '', //每月租金
@@ -122,6 +126,29 @@
 			}
 			//取出登录用户信息，方便下面取用
 			this.user = JSON.parse(userJson)
+			
+			let trust = this.$route.params.trust
+			console.log(trust)
+			if(trust){ //当前页是更新房源信息页，暂不支持修改图片
+				this.addOrUpdate = 'update'
+				
+				this.trustid = trust.trustid
+				this.trust_title = trust.trust_title
+				this.trust_detail = trust.trust_detail
+				this.price_monthly = trust.price_monthly
+				this.min_age = trust.min_age
+				this.max_age = trust.max_age
+				this.foodCondition = trust.food_service
+				this.eduCondition = trust.edu_service
+				this.province_city_region = trust.trust_address.split(' ')[0]
+				this.detail_address = trust.trust_address.split(' ')[1]
+				//
+				//this.imglist=
+				
+			}else{ //当前页是添加房源信息页
+				this.addOrUpdate = 'add'	
+			}
+			
 		},
 		methods:{
 			ConfirmCity(cityinfo) { //地区选择器确认选择时
@@ -133,7 +160,8 @@
 				// 此时可以自行将文件上传至服务器
 				console.log(file);
 			},
-			submitForm() { //验证表单项并上传	
+			
+			addTrust(){	//添加托管提供信息时
 				let _this = this
 				this.$refs.addTrustForm.validate()
 				.then(()=>{
@@ -183,6 +211,45 @@
 				.catch((e) => { //表单项绑定的验证规则没有全部通过后执行 catch 代码块
 					_this.$toast(e[0].message)
 				})
+			},
+			updateTrust(){	//更新托管提供信息时
+				let _this = this
+				this.$refs.addTrustForm.validate()
+				.then(()=>{
+					_this.$http.post('/trust/update',{
+						trustid: _this.trustid,
+						publisher_phone: _this.user.phone,
+						publisher_uid: _this.user.uid,        
+						trust_title: _this.trust_title,       
+						price_monthly: _this.price_monthly,   
+						min_age: _this.min_age,              
+						max_age: _this.max_age,               
+						trust_detail: _this.trust_detail,    
+						trust_address: _this.trust_address,   
+						edu_service: _this.edu_service,      
+						food_service: _this.food_service     
+						
+					}).then(res => {
+							console.log(res)
+							if(res.meta.code!==200){  //收到服务器的失败信息
+								_this.$toast(res.meta.msg)
+							}else{  //更新成功，跳转我的托管提供信息列表页
+								_this.$toast('更新托管提供信息成功')
+								_this.$router.replace('/mytrustlist')
+							}
+						})				
+				})
+				.catch((e) => { //表单项绑定的验证规则没有全部通过后执行 catch 代码块
+					_this.$toast(e[0].message)
+				})
+			},
+			
+			submitForm() { //验证表单项并上传	
+				if(this.addOrUpdate==='update'){
+					this.updateTrust()					
+				}else{
+					this.addTrust()
+				}	
 			}
 			
 		},
@@ -195,14 +262,14 @@
 				this.eduCondition.forEach((item,index)=>{
 					eduStr+=item.trim(' ')+','
 				})
-				return eduStr.trim(',')
+				return eduStr.replace(/^,+|,+$/gi,'')
 			},
 			food_service(){
 				let foodStr=''
 				this.foodCondition.forEach((item,index)=>{
 					foodStr+=item.trim(' ')+','
 				})
-				return foodStr.trim(',')
+				return foodStr.replace(/^,+|,+$/gi,'')
 			}
 		}
 	}

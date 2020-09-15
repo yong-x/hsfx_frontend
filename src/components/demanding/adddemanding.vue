@@ -1,7 +1,7 @@
 <template>
 	<div class="my-content">
 		<!-- 顶部导航条 -->
-		<detail-add-navbar navBarTitle="发布求租需求"></detail-add-navbar>
+		<detail-add-navbar :navBarTitle="addOrUpdate=='add'?'发布求租需求':'修改求租需求信息'"></detail-add-navbar>
 		<!-- 要提交的表单 -->
 		<van-form :validate-first="true" :show-error-message="false" ref="addDemandForm">			
 			<van-field v-model="demand_title" name="求租标题" label="求租标题" placeholder="请输入求租标题" :rules="[{ required: true, message: '请输入求租标题' }]" />						
@@ -49,6 +49,9 @@
 		data(){
 			return {
 				user: {},  //当前登录用户	
+				addOrUpdate: 'add', //当前是登录还是更新
+				demandid:'', //如果是更新则有此值
+				
 				demand_title: '',							
 				house_detail: '', //详细描述		
 				price_monthly: '', //每月租金
@@ -96,6 +99,29 @@
 			}
 			//取出登录用户信息，方便下面取用
 			this.user = JSON.parse(userJson)
+			
+			/*判断是添加还是更新*/
+			let demand = this.$route.params.demand
+			console.log(demand)
+			if(demand){ //当前页是更新求租信息页
+				this.addOrUpdate = 'update'
+				
+				this.demandid = demand.demandid
+				this.demand_title = demand.demand_title
+				this.house_detail = demand.demand_detail
+				this.price_monthly = demand.price_monthly
+				this.area = demand.area				
+				this.demand_detail = demand.demand_detail
+				this.bedroom = demand.layout.length>=2?demand.layout.substr(0,1):1
+				this.hall = demand.layout.length>=4?demand.layout.substr(2,1):0
+				
+				this.province_city_region = demand.demand_address.split(' ')[0]
+				this.detail_address = demand.demand_address.split(' ')[1]
+																
+			}else{ //当前页是添加房源信息页
+				this.addOrUpdate = 'add'	
+			}
+			
 		},
 		methods:{
 			ConfirmCity(cityinfo) { //地区选择器确认选择时
@@ -103,7 +129,7 @@
 				this.province_city_region = cityinfo[0].name + cityinfo[1].name + cityinfo[2].name
 				this.showCityPick = false
 			},
-			submitForm(){  //提交添加求租需求表单
+			addDemand(){ //添加求租需求时
 				let _this = this
 				this.$refs.addDemandForm.validate()
 				.then(()=>{	//表单项绑定的验证规则全部通过后执行 then 代码块					
@@ -128,6 +154,41 @@
 				.catch((e) => { //表单项绑定的验证规则没有全部通过后执行 catch 代码块
 					_this.$toast(e[0].message)
 				})
+			},
+			updateDemand(){ //更新求租需求时
+				let _this = this
+				this.$refs.addDemandForm.validate()
+				.then(()=>{	//表单项绑定的验证规则全部通过后执行 then 代码块					
+					_this.$http.post('/demand/update', {						
+						demandid: _this.demandid,
+						demand_title: _this.demand_title,
+						demand_address: _this.demand_address,
+						publisher_uid: _this.user.uid,						
+						price_monthly: _this.price_monthly,
+						demand_detail: _this.demand_detail,
+						area: _this.area,
+						layout: _this.layout												
+					}).then(res => {
+							console.log(res)
+							if(res.meta.code!==200){  //收到服务器的更新失败信息
+								_this.$toast(res.meta.msg)
+							}else{  //更新成功，跳转我的求租需求列表页
+								_this.$toast('更新求租需求信息成功')
+								_this.$router.replace('/mydemandlist')
+							}
+						})					
+				})
+				.catch((e) => { //表单项绑定的验证规则没有全部通过后执行 catch 代码块
+					_this.$toast(e[0].message)
+				})
+			},			
+			submitForm(){  //提交添加求租需求表单
+				if(this.addOrUpdate === 'update'){
+					
+					this.updateDemand()					
+				}else{
+					this.addDemand()
+				}	
 			}
 		},
 		computed: {

@@ -1,7 +1,8 @@
 <template>
 	<div class="my-content">
 		<!-- 顶部导航条 -->
-		<detail-add-navbar navBarTitle="发布托管需求"></detail-add-navbar>
+		<detail-add-navbar 
+		:navBarTitle="addOrUpdate=='add'?'发布托管需求':'修改托管需求信息'"></detail-add-navbar>
 		<!-- 要提交的表单 -->
 		<van-form :validate-first="true" :show-error-message="false" ref="addTrustDemandForm">			
 			<!-- 标题 -->
@@ -60,6 +61,8 @@
 		data(){
 			return {
 				user: {},  //当前登录用户	
+				addOrUpdate: 'add', //当前是登录还是更新
+				trustdemandid:'', //如果是更新则有此值
 				
 				trustdemand_title:'',
 				childage:'',
@@ -108,6 +111,28 @@
 			}
 			//取出登录用户信息，方便下面取用
 			this.user = JSON.parse(userJson)
+			
+			/*判断是添加还是更新*/
+			let trustdemand = this.$route.params.trustdemand
+			console.log(trustdemand)
+			if(trustdemand){ //当前页是更新求租信息页
+				this.addOrUpdate = 'update'
+				
+				this.trustdemandid = trustdemand.trustdemandid 
+				this.trustdemand_title = trustdemand.trustdemand_title
+				this.childage = trustdemand.childage
+				this.price_monthly = trustdemand.price_monthly
+				this.trustdemand_time = trustdemand.trustdemand_time
+				this.foodCondition = trustdemand.food_service
+				this.eduCondition = trustdemand.edu_service
+				this.trustdemand_detail = trustdemand.trustdemand_detail
+				
+				this.province_city_region = trustdemand.trustdemand_address.split(' ')[0]
+				this.detail_address = trustdemand.trustdemand_address.split(' ')[1]
+																
+			}else{ //当前页是添加房源信息页
+				this.addOrUpdate = 'add'	
+			}
 		},
 		methods:{
 			ConfirmCity(cityinfo) { //地区选择器确认选择时
@@ -115,7 +140,7 @@
 				this.province_city_region = cityinfo[0].name + cityinfo[1].name + cityinfo[2].name
 				this.showCityPick = false
 			},
-			submitForm(){  //提交添加表单
+			addTrustDemand(){
 				let _this = this
 				this.$refs.addTrustDemandForm.validate()
 				.then(()=>{	//表单项绑定的验证规则全部通过后执行 then 代码块					
@@ -143,6 +168,43 @@
 				.catch((e) => { //表单项绑定的验证规则没有全部通过后执行 catch 代码块
 					_this.$toast(e[0].message)
 				})
+			},
+			updateTrustDemand(){
+				let _this = this
+				this.$refs.addTrustDemandForm.validate()
+				.then(()=>{	//表单项绑定的验证规则全部通过后执行 then 代码块					
+					_this.$http.post('/trust_demand/update', {						
+						trustdemandid: _this.trustdemandid,
+						publisher_uid: _this.user.uid,
+						trustdemand_title: _this.trustdemand_title,
+						childage: _this.childage,
+						price_monthly: _this.price_monthly,
+						trustdemand_time: _this.trustdemand_time,
+						trustdemand_address: _this.trustdemand_address,
+						edu_service: _this.edu_service,						
+						food_service: _this.food_service,
+						trustdemand_detail: _this.trustdemand_detail
+																		
+					}).then(res => {
+							console.log(res)
+							if(res.meta.code!==200){  //收到服务器的添加失败信息
+								_this.$toast(res.meta.msg)
+							}else{  //添加成功，跳转我的托管需求列表页
+								_this.$toast('更新托管需求信息成功')
+								_this.$router.replace('/mytrustdemandlist')
+							}
+						})					
+				})
+				.catch((e) => { //表单项绑定的验证规则没有全部通过后执行 catch 代码块
+					_this.$toast(e[0].message)
+				})
+			},
+			submitForm(){  //提交添加表单
+				if(this.addOrUpdate === 'update'){			
+					this.updateTrustDemand()					
+				}else{
+					this.addTrustDemand()
+				}	
 			}
 		},
 		computed: {
@@ -152,16 +214,16 @@
 			edu_service(){
 				let eduStr=''
 				this.eduCondition.forEach((item,index)=>{
-					eduStr+=item.trim('')+','
+					eduStr+=item.replace(/\s+/g,"")+','
 				})
-				return eduStr.trim(',')
+				return eduStr.replace(/^,+|,+$/gi,'')
 			},
 			food_service(){
 				let foodStr=''
 				this.foodCondition.forEach((item,index)=>{
-					foodStr+=item.trim(' ')+','
+					foodStr+=item.replace(/\s+/g,"")+','
 				})
-				return foodStr.trim(',')
+				return foodStr.replace(/^,+|,+$/gi,'')
 			}
 		}
 		

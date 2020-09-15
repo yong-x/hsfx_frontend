@@ -19,6 +19,9 @@ import trustdemand_detail from '../components/trusting_demanding/trustdemand_det
 import userinfo from '../components/user/userinfo.vue'
 import update_pwd from '../components/user/update_pwd.vue'
 import myhouselist from '../components/renting/myhouselist.vue'
+import mydemandlist from '../components/demanding/mydemandlist.vue'
+import mytrustlist from '../components/trusting/mytrustlist.vue'
+import mytrustdemandlist from '../components/trusting_demanding/mytrustdemandlist.vue'
 
 /*
 this.$router是Vue-Router的实例，需要导航到不同路由则用this.$router.push方法
@@ -99,6 +102,11 @@ Vue.use(VueRouter)
 	   name: 'demanding_detail',
 	   component: demanding_detail
 	 },
+	 {
+	   path: '/mydemandlist',
+	   name: 'mydemandlist',
+	   component: mydemandlist
+	 },
 	 { //提供托管相关
 	   path: '/addtrusting',
 	   name: 'addtrusting',
@@ -108,6 +116,11 @@ Vue.use(VueRouter)
 	   path: '/trusting_detail',
 	   name: 'trusting_detail',
 	   component: trusting_detail
+	 },
+	 {
+	   path: '/mytrustlist',
+	   name: 'mytrustlist',
+	   component: mytrustlist
 	 },
 	 { //托管需求相关
 	   path: '/addtrustdemand',
@@ -119,12 +132,17 @@ Vue.use(VueRouter)
 	   name: 'trustdemand_detail',
 	   component: trustdemand_detail
 	 },
+	 {
+	   path: '/mytrustdemandlist',
+	   name: 'mytrustdemandlist',
+	   component: mytrustdemandlist
+	 },
 	 { //用户信息和密码相关
 	   path: '/userinfo',
 	   name: 'userinfo',
 	   component: userinfo
 	 },
-	 { //用户信息和密码相关
+	 { 
 	   path: '/update_pwd',
 	   name: 'update_pwd',
 	   component: update_pwd

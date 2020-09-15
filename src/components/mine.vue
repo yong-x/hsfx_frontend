@@ -3,9 +3,9 @@
 		<van-nav-bar id="topNav" title="我的"></van-nav-bar>
 		<ul class="mine-menu">
 			<li @click="toMyHouse">发布的房源提供信息</li>
-			<li>发布的房源求租信息</li>
-			<li>发布的托管提供信息</li>
-			<li>发布的托管需求信息</li>
+			<li @click="toMyHouseDemand">发布的房源求租信息</li>
+			<li @click="toMyTrust">发布的托管提供信息</li>
+			<li @click="toMyTrustDemand">发布的托管需求信息</li>
 			<li @click="updateUser">修改基本信息</li>
 			<li @click="updatePwd">修改密码</li>
 		</ul>		
@@ -53,6 +53,15 @@
 			},
 			toMyHouse(){
 				this.$router.push('/myhouselist')
+			},
+			toMyHouseDemand(){
+				this.$router.push('/mydemandlist')
+			},
+			toMyTrust(){
+				this.$router.push('/mytrustlist')
+			},
+			toMyTrustDemand(){
+				this.$router.push('/mytrustdemandlist')
 			}
 		}
 	}

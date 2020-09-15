@@ -1,7 +1,7 @@
 <template>
-	<div class="my-content">		
+	<div class="my-content">
 		<!-- 头部导航区 -->
-		<van-nav-bar id="topNav" title="我发布的房源" @click-left="$router.go(-1)">
+		<van-nav-bar id="topNav" title="我发布的求租" @click-left="$router.go(-1)">
 			<template #left>
 				<van-icon size="20" class="iconfont" class-prefix="icon" name="fanhui"/>
 			</template>
@@ -22,15 +22,15 @@
 			:formatter="formatter"
 			/>
 		</van-popup>
-		<!-- 主体内容区 -->
-		
-			<van-list 
+		<!-- 主体内容区 -->		
+			<van-list  
 			v-model="loading"
 			:immediate-check="false"
 			:finished="finished"
 			finished-text="没有更多了"
 			@load="onLoad">
-				<van-card v-for="(item ,index) in list" :desc="item.house_detail" :price="item.price_monthly"  :title="item.house_adderss" :thumb="getRealImgSrc(item.imglist[0])" :key="item.houseid" @click="toHouseDetail(item)">
+			
+				<van-card v-for="(item,index) in list" :price="item.price_monthly"  :title="item.demand_title" :desc="item.demand_detail"  :key="item.demandid" @click="toDemandDetail(item)">
 					<template #tags>
 						<div class="house-layout-area">
 							<van-tag  type="success">{{item.layout}}</van-tag>
@@ -39,27 +39,25 @@
 									{{item.area}}m&sup2;  
 								</template>
 							</van-tag>
-						</div>
-						
-						<van-tag plain type="primary" v-for="tag in item.taglist">{{tag}}</van-tag>					
+						</div>										
 					</template>
-					<template #num>					
-						<span>{{item.house_address.split(' ')[1]}}</span><br/>
+					<template #num>
+						<span>{{item.demand_address.split(' ')[1]}}</span><br/>
 						<span>{{item.publish_time}}</span>
 					</template>
 					<template #footer>
-					    <van-button @click.stop="editHouse(item)" type="info" size="mini">编辑</van-button>
-					    <van-button @click.stop="deleteHouse(item.houseid,index)" type="danger" size="mini">删除</van-button>
+					    <van-button @click.stop="editDemand(item)" type="info" size="mini">编辑</van-button>
+					    <van-button @click.stop="deleteDemand(item.demandid,index)" type="danger" size="mini">删除</van-button>
 									<!-- stop阻止事件冒泡，表示只响应当前回调方法 -->
 					</template>
 				</van-card>
-	
-			</van-list>
+			
+			</van-list>		
 	</div>
 </template>
 
 <script>
-	export default {
+	export default{
 		data() {
 			return {
 				user: {},//当前登录用户
@@ -71,31 +69,34 @@
 				curdate: this.formatDate(),	//头部导航栏右边显示的时间条件			
 				pageSize: 10,   //页面大小，每次请求多少条
 				pageNumber: 1,  //当前请求的页号
-					
+				
+				
 				list:  [],  //当前展示的数据列表
 				isLastPage: false, //当前页是否是最后一页
 				loading: false,  //列表上拉加载状态，为true表示正在发送请求加载数据，为false表示加载数据结束
-				finished: false,  //是否所有数据加载完成				
+				finished: false  //是否所有数据加载完成				
 			};
 		},
-		created() {
+		created(){
+			
 			/*
 			this.list = [{
-					houseid: 1,
-					publisher_uid: 1,
-					publisher_username: '张三',
-					publisher_phone:'15812345678',
-					publish_time: '2018-10-10',
-					price_monthly: 1234.12,
+					demandid: '1',
+					demand_title: '求租标题，如精装修',
 					house_address: '中南路，武昌火车站',
-					house_detail: '优质房源，交通便利，基础设施配备齐全，周围超市学校菜场众多，欢迎有需要的朋友与我联系。',
-					imglist: [require('../assets/01.jpg'),require('../assets/02.jpg'),require('../assets/03.jpg'),require('../assets/04.jpg')],
-					taglist: ['朝阳','交通便利','独立厨房','学区房'],
+					publisher_username: '陈先生',
+					publisher_phone: '13297215689',
+					publish_time: '2020-08-22',
+					demand_detail: `需要在华师附小旁找一个二室一厅的房源，要求距离华师附小不超过10km，交通方便，带
+									独立卫生间，独立厨房，朝阳。需要在华师附小旁找一个二室一厅的房源，要求距离华师附小不超过10km，交通方便，带
+									独立卫生间，独立厨房，朝阳。需要在华师附小旁找一个二室一厅的房源，要求距离华师附小不超过10km，交通方便，带
+									独立卫生间，独立厨房，朝阳。需要在华师附小旁找一个二室一厅的房源，要求距离华师附小不超过10km，交通方便欢迎有房源的朋友与我联系`,
+					price_monthly: 2000,										
 					area: 80,
-					layout: '2室1厅'					
-				}				
-			]
-			*/		
+					layout: '两室一厅'					
+				}
+				]
+				*/
 			//检查sessionStorage中用户信息，即是否登录
 			let userJson = window.sessionStorage.getItem('user')
 			console.log(userJson)
@@ -117,7 +118,7 @@
 			}				
 			//检索数据初始化列表
 			this.retrieveByForm(true)			
-		},		
+		},
 		methods: {			
 			formatter(type, val) {  //弹出的时间选择器格式化器
 			     if (type === 'year') {
@@ -147,7 +148,8 @@
 				//return year + '-' + month + '-' + day + ' ' + hours + ':' + minutes + ':' + seconds;
 				//return year + '-' + month + '-' + day;
 				return year + '-' + month
-			},				
+			},			
+			
 			onConfirm(time) { //确认时间后,根据所点击元素，将所选时间值赋值给所点击元素，立即向服务器发送搜索请求								
 				this.curdate = this.formatDate(time)															
 				this.showPicker = false				
@@ -156,10 +158,12 @@
 				this.resetOnLoad()												
 			},
 			
+			
+			
 			retrieveByForm(isRefresh){  //根据表单搜索条件向服务器发送请求，查询数据对list赋值
 				let _this = this
 				this.$http.post(
-				'/house/retrieve', 
+				'/demand/retrieve', 
 				{
 					publisher_uid:this.user.uid,
 					start_time: this.start_time,
@@ -170,61 +174,60 @@
 				).then(res => {
 					console.log(res)
 					if(res.meta.code===200){  //成功收到服务器响应数据						
-						if(res.data.houseList.length===0){ //没有检索到数据
+						if(res.data.demandList.length===0){ //没有检索到数据
 							_this.isLastPage = true  //当前页是最后一页
 						}						
 						if(isRefresh){
-							_this.list = res.data.houseList							
+							_this.list = res.data.demandList							
 							if(_this.list.length===0){
 								_this.$toast('没有检索到数据')
 							}else{
 								_this.$toast('检索完成')
 							}							
 						}else{
-							_this.list = _this.list.concat(res.data.houseList)
+							_this.list = _this.list.concat(res.data.demandList)
 						}													
+					}else{
+						_this.$toast(res.meta.msg)
 					}
 				})
 			},
-			getRealImgSrc(relativeImgSrc){				
-				return process.env.VUE_APP_Server+relativeImgSrc
-			},
-			onLoad(){  //上拉加载时，请求下一页数据添加到List尾部				
+			
+		
+			onLoad(){  //上拉加载时，请求下一页数据添加到List尾部
 				this.pageNumber++				
 				this.retrieveByForm(false)	
-				this.loading = false //本次加载结束，可以执行下次加载
+				this.loading = false //本次加载下一页结束，
 				
 				if(this.isLastPage){ //上面请求的页是最后一页					
 					this.finished = true	//按当前搜索表单所有数据加载完毕				
-				}else{
-					this.finished = false //所有数据加载完毕										
+				}else{					
+					this.finished = false //所有数据没有加载完										
 				}
 			},
-			resetOnLoad(){  //恢复上拉加载
+			resetOnLoad(){  //恢复下拉加载
 				this.loading = false //
 				this.finished = false //
 				this.isLastPage = false //
-			},			
-			toAddHouse(){
-				console.log(process.env.VUE_APP_Server)
-				//this.$toast('添加房子')
-				this.$router.push('/addhouse')
 			},
-			toHouseDetail(house){
-				//this.$toast('房源详情页')				
-				this.$router.push({name:'house_detail',params:{house:house}})
-			},
-			deleteHouse(houseid,index){  //删除发布的房源
+			// toAddHouseDeamnding(){  //去添加房屋求租页		
+			// 	this.$router.push('/adddemanding')
+			// },
+			toDemandDetail(demanding){  //去房源求租详情页							
+				this.$router.push({name:'demanding_detail',params:{demanding:demanding}})
+			},									
+			deleteDemand(demandid,index){  //删除发布的求租
 				let _this = this
 				this.$dialog.confirm({				  
 				  message: '确认要删除该条数据吗？',
 				})
 				.then(() => {
 				    // on confirm
+					//_this.$toast('你点击了确定'+houseid)
 					
 					_this.$http.post(
-						`/house/delete`,
-						{houseid: houseid,
+						`/demand/delete`,
+						{demandid: demandid,
 						uid: _this.user.uid}					
 					)
 					.then(res => {
@@ -232,8 +235,6 @@
 						if(res.meta.code===200){  //成功收到服务器响应数据						
 							_this.list.splice(index,1)
 							_this.$toast('删除成功')												
-						}else{
-							_this.$toast(res.meta.msg)
 						}
 					})
 				})
@@ -242,10 +243,10 @@
 					_this.$toast('你取消了删除操作')
 				});
 			},
-		
-			editHouse(house){  //编辑发布的房源(编辑与添加共用一个组件)
-				this.$router.push({name:'addhouse',params:{house:house}})
-			}
+					
+			editDemand(demand){  //编辑发布的求租(编辑与添加共用一个组件)
+				this.$router.push({name:'adddemanding',params:{demand:demand}})
+			}		
 		},
 		beforeRouteLeave (to, from, next) { //离开本路由（页面）前将参数保持到localStorage中，进行参数保持
 			// 导航离开该组件的对应路由时调用
@@ -271,15 +272,12 @@
 				return year+'-'+month +'-'+ lastDate
 			}
 		}
-	};
+	}
+	
 </script>
 
 <style lang="less" scoped>
-	.house-layout-area{
-		margin-top: 0.1875rem;
-		margin-bottom: 0.1875rem;
-	}	
-	// 把价格数字放到最底部,时间，地址靠右
+	// 把价格数字放到最底部
 	.van-card__bottom {
 		position: relative;
 		.van-card__price{
@@ -289,5 +287,5 @@
 		.van-card__num{
 			text-align: right;
 		}
-	}	
+	}
 </style>
